@@ -4,3 +4,4 @@ twitter
 pyenchant
 celery
 django-celery-beat
+redis

@@ -2,10 +2,15 @@ from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
 import django
+
+# Load the django settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'both.settings')
 django.setup()
 
+
+
+
 from django.core.management.base import BaseCommand, CommandError
-from .models import Contest
 from twitter import Twitter, OAuth
 import enchant
 import re
@@ -26,17 +31,10 @@ ACCESS_SECRET = "B6riFQmrkZeOZHEU8so6eCDLkMRqfGL0rB2nAP8RuU6wr"
 alphabetical = re.compile('[^a-zA-Z]')
 
 
+app = Celery('both', broker="redis://localhost:6379")
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
-
-# set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'both.settings')
-
-app = Celery('both')
-
-# Pulls django configuration data and finds all tasks.  Although there's only one task.
-#app.config_from_object('django.conf:settings')
-#app.autodiscover_tasks(packages=None, related_name='tasks')
-
+from .models import Contest
 
 def count_typos(twitter_data):
     typos = 0

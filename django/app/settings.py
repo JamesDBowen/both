@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -38,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'both',
+    'celery',
     'django_celery_beat',
 )
 
@@ -106,3 +108,18 @@ DATABASES = {
         'PORT': '5432'
     }
 }
+
+BROKER_URL = "redis://localhost:6379"
+BROKER_TRANSPORT_OPTIONS = {'fanout_prefix': True, 'fanout_patterns': True, 'visibility_timeout': 480}
+CELERY_RESULT_BACKEND = BROKER_URL
+CELERY_ALWAYS_EAGER = True
+
+CELERYBEAT_SCHEDULE = {
+    'update_contests': {
+        'task': 'both.celery.addrandom', # notice that the complete name is needed
+        'schedule': timedelta(minutes=5),
+    },
+}
+
+CELERY_TIMEZONE = 'UTC'
+
